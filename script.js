@@ -4,7 +4,9 @@
 const API = "c3926d7198msh7f865f753f0716bp1348e9jsn75c8521a48ba";
 
 // 1. تهيئة الخريطة المجانية (Leaflet + OpenStreetMap)
-const map = L.map("mapContainer").setView([30.0444, 31.2357], 6);
+const compactMapQuery = window.matchMedia("(max-width: 760px)");
+
+const map = L.map("mapContainer", { minZoom: 2 }).setView([30.0444, 31.2357], 6);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
@@ -321,7 +323,7 @@ function renderMarkers(markersList, countryName) {
   });
 
   const group = L.featureGroup(leafletMarkers);
-  map.fitBounds(group.getBounds(), { padding: [60, 60], maxZoom: 14 });
+  map.fitBounds(group.getBounds(), mapFitOptions());
 
   // تحديث شريط ملخص النتائج
   if (resultsSummary && resultsText) {
@@ -492,6 +494,61 @@ inputSearchForm.addEventListener("submit", (e) => {
 
 // تحميل قائمة الدول مسبقاً في الخلفية
 fetchCountries();
+
+function isCompactMap() {
+  return compactMapQuery.matches;
+}
+
+function syncSheetOffset() {
+  const sidebar = document.querySelector(".bst-sidebar");
+  const height = isCompactMap() && sidebar ? sidebar.offsetHeight : 0;
+  document.documentElement.style.setProperty("--sheet-h", `${height}px`);
+}
+
+function mapFitOptions() {
+  const compact = isCompactMap();
+  const sheet = compact
+    ? document.querySelector(".bst-sidebar")?.offsetHeight || 240
+    : 48;
+  return {
+    paddingTopLeft: [36, compact ? 64 : 56],
+    paddingBottomRight: [36, compact ? sheet + 20 : 56],
+    maxZoom: compact ? 5 : 14,
+  };
+}
+
+function setInitialView() {
+  if (cachedMarkers.length > 0) return;
+  if (isCompactMap()) {
+    map.setView([22, 25], 3, { animate: false });
+    const sheet = document.querySelector(".bst-sidebar")?.offsetHeight || 0;
+    if (sheet) map.panBy([0, Math.round(sheet * 0.42)], { animate: false });
+  } else {
+    map.setView([30.0444, 31.2357], 6, { animate: false });
+  }
+  map.invalidateSize();
+}
+
+function frameMap() {
+  syncSheetOffset();
+  setInitialView();
+}
+
+compactMapQuery.addEventListener("change", () => {
+  syncSheetOffset();
+  if (cachedMarkers.length > 0 && currentCountry) {
+    renderMarkers(cachedMarkers, currentCountry);
+    return;
+  }
+  setInitialView();
+});
+window.addEventListener("resize", () => {
+  syncSheetOffset();
+  map.invalidateSize();
+});
+window.addEventListener("DOMContentLoaded", () => {
+  requestAnimationFrame(frameMap);
+});
 
 /* Sweet Alert warning */
 window.addEventListener("DOMContentLoaded", () => {

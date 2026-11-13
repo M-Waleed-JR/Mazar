@@ -7,7 +7,10 @@
       rel="icon"
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏨</text></svg>"
     />
-    <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
 
     <!-- خطوط جوجل (Cairo للعربية و Montserrat للإنجليزية) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -37,6 +40,7 @@
 
       <!-- كارت البحث العصري العائم -->
       <aside class="bst-sidebar">
+        <div class="sheet-handle" aria-hidden="true"></div>
         <div class="bst-filter">
           <header class="app-header">
             <div class="brand-row">
@@ -51,6 +55,7 @@
           <form id="input_search">
             <!-- حقل البحث الموحد والذكي -->
             <div class="search-field-container">
+              <label class="field-label" for="search">الدولة</label>
               <div class="search-input-wrapper">
                 <span class="search-icon">
                   <svg
